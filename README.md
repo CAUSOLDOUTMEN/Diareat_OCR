@@ -1,3 +1,6 @@
+## Diareat_OCR
+Original Repo: https://github.com/black7375/korean_ocr_using_pororo
+
 <h2 align="center">
 Korean OCR using pororo
 </h2>
