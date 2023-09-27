@@ -81,6 +81,6 @@ class PororoOcr:
 
 if __name__ == "__main__":
     ocr = PororoOcr()
-    image_path = "cropped_table_enhanced.jpg"
+    image_path = "test_image/output/cropped_table_enhanced.jpg"
     text = ocr.run_ocr(image_path, debug=True)
     print('Result :', text)
