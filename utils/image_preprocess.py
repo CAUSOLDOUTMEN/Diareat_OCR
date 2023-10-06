@@ -1,12 +1,15 @@
 import cv2
+import numpy as np
+from PIL import Image
+
 
 class PreProcessor:
     def __init__(self, image_path: str, x: int, y: int, w: int, h: int):
         self.image_path = image_path
-        self.x = x # 좌측 상단 꼭지점
-        self.y = y # 좌측 하단 꼭지점
-        self.w = w # 우측 상단 꼭지점
-        self.h = h # 우측 하단 꼭지점
+        self.x = x  # 좌측 상단 꼭지점
+        self.y = y  # 좌측 하단 꼭지점
+        self.w = w  # 우측 상단 꼭지점
+        self.h = h  # 우측 하단 꼭지점
         # 이미지의 좌표 네 개를 초기화
 
     def grayscale_image(self):
@@ -44,8 +47,46 @@ class PreProcessor:
         # output_path = "../test_image/output/cropped_table_enhanced.jpg"
         # cv2.imwrite(output_path, cropped_image)
 
+    def affine_transformation(self,img):
+        pts = np.zeros((4, 2), dtype=np.float32)
+        print(self.x)
+        pts[0] = [self.x, self.y]
+        pts[1] = [self.x + self.w, self.y]
+        pts[2] = [self.x, self.y + self.h]
+        pts[3] = [self.x + self.w, self.y + self.h]
+        print(*pts)
 
+        sm = pts.sum(axis=1)
+        diff = np.diff(pts, axis=1)
 
+        topLeft = pts[np.argmin(sm)]
+        bottomRight = pts[np.argmax(sm)]
+        topRight = pts[np.argmin(diff)]
+        bottomLeft = pts[np.argmax(diff)]
+        print(topLeft, bottomLeft, bottomRight, topRight, sep = " ")
 
+        pts1 = np.float32([topLeft, topRight, bottomRight, bottomLeft])
+        w1 = abs(bottomRight[0] - bottomLeft[0])
+        w2 = abs(topRight[0] - topLeft[0])
+        h1 = abs(topRight[1] - bottomRight[1])
+        h2 = abs(topLeft[1] - bottomLeft[1])
+        width = max([w1, w2])
+        height = max([h1, h2])
 
+        pts2 = np.float32([[0, 0], [width - 1, 0],
+                           [width - 1, height - 1], [0, height - 1]])
 
+        mtrx = cv2.getPerspectiveTransform(pts1, pts2)
+        result = cv2.warpPerspective(img, mtrx, (int(width), int(height)))
+        pil_image = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(pil_image)
+        cv2.imshow('scanned', result)
+
+        return pil_image
+
+    def runPreprocess(self):
+        grayscale_image = self.grayscale_image()
+        affine_image = self.affine_transformation(grayscale_image)
+
+        output_path = "../test_image/output/result.png"
+        affine_image.save(output_path)

@@ -2,6 +2,7 @@ import cv2
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
 from utils.image_util import plt_imshow, put_text
+from utils.image_preprocess import PreProcessor
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -82,5 +83,7 @@ class PororoOcr:
 if __name__ == "__main__":
     ocr = PororoOcr()
     image_path = "test_image/output/cropped_table_enhanced.jpg"
+    preprocessor = PreProcessor(image_path,0,0,0,0)
+    preprocessor.runPreprocess()
     text = ocr.run_ocr(image_path, debug=True)
     print('Result :', text)
