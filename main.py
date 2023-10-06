@@ -1,8 +1,8 @@
 import cv2
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
-from utils.image_util import plt_imshow, put_text
 from utils.image_preprocess import PreProcessor
+from utils.image_util import plt_imshow, put_text
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -82,8 +82,13 @@ class PororoOcr:
 
 if __name__ == "__main__":
     ocr = PororoOcr()
+    image = cv2.imread('test_image/input/test9.jpeg')
+
     image_path = "test_image/output/cropped_table_enhanced.jpg"
-    preprocessor = PreProcessor(image_path,0,0,0,0)
-    preprocessor.runPreprocess()
+    preprocessor = PreProcessor()
+    screen_cnt = preprocessor.detectContour(image)
+    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4,2))
+    cv2.imwrite("test_image/output/cropped_table_enhanced.jpg", warped)
+
     text = ocr.run_ocr(image_path, debug=True)
     print('Result :', text)
