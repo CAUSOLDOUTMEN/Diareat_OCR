@@ -1,8 +1,9 @@
 version: '3.7'
 
 services:
-  web:
-    build: .
+  ocr:
+    image: synoti21/diareat_ocr:latest
+    container_name: diareat-ocr
     command: ["pipenv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8000:8000"
