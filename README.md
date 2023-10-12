@@ -1,3 +1,3 @@
 ## Diareat_OCR
 Original Repo: https://github.com/black7375/korean_ocr_using_pororo
-![무제 002](https://github.com/CAUSOLDOUTMEN/Diareat_OCR/assets/58936172/8d395675-7534-4c5b-90c4-de1f256c901f)
+![무제 002](https://github.com/CAUSOLDOUTMEN/Diareat_OCR/assets/58936172/22be9d3c-62e0-4470-98f0-2c90a9aa4043)
