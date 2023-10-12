@@ -103,7 +103,6 @@ async def read_item(file: UploadFile = File(...)):
     screen_cnt = preprocessor.detectContour(image)
     warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
 
-    # 이미지 저장 및 OCR 실행
     image_path = "test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
     text = ocr.run_ocr(image_path, debug=True)
