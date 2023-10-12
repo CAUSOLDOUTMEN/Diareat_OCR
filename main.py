@@ -1,3 +1,4 @@
+import os
 import re
 import traceback
 
@@ -123,11 +124,11 @@ def health_check():
     return {"ping":"pong"}
 
 @app.post("/parse_nutrients/")
-async def read_item(image_url: str = Form(...)):
+async def read_item(image_key: str = Form(...)):
     try:
-        file_name = f"./temp_{uuid.uuid4().hex}.jpg"
-        s3_client.download_file(BUCKET_NAME, image_url, file_name)
-
+        file_name = f"cache/temp_{image_key}"
+        if not os.path.exists(file_name):
+            s3_client.download_file(BUCKET_NAME, image_key, file_name)
         image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
         screen_cnt = preprocessor.detectContour(image)
