@@ -16,6 +16,7 @@ uvicorn = "*"
 numpy = "1.25.2"
 boto3 = "*"
 configparser = "*"
+python-multipart = "*"
 
 [dev-packages]
 
