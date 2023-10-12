@@ -1,8 +1,16 @@
+import re
+
 import cv2
+import numpy as np
+
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
 from utils.image_preprocess import PreProcessor
 from utils.image_util import plt_imshow, put_text
+from utils.nutrition_parser import parse_nutrients_from_text
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse
+
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -80,15 +88,39 @@ class PororoOcr:
         plt_imshow(["Original", "ROI"], [img, roi_img], figsize=(16, 10))
 
 
-if __name__ == "__main__":
-    ocr = PororoOcr()
-    image = cv2.imread('test_image/input/test9.jpeg')
+app = FastAPI()
+
+ocr = PororoOcr()  # OCR 모듈 초기화
+preprocessor = PreProcessor()
+
+
+@app.post("/parse_nutrients/")
+async def read_item(file: UploadFile = File(...)):
+    contents = await file.read()
+    image_np = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+
+    screen_cnt = preprocessor.detectContour(image)
+    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
 
     image_path = "test_image/output/cropped_table_enhanced.jpg"
-    preprocessor = PreProcessor()
-    screen_cnt = preprocessor.detectContour(image)
-    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4,2))
-    cv2.imwrite("test_image/output/cropped_table_enhanced.jpg", warped)
-
+    cv2.imwrite(image_path, warped)
     text = ocr.run_ocr(image_path, debug=True)
-    print('Result :', text)
+
+    realdata = ""
+    for d in text:
+        if '탄' in d:
+            realdata = d
+            break
+
+    final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
+    final_dict = {key: -1 for key in final_key}
+
+    if not realdata:
+        raise HTTPException(status_code=404, detail='텍스트 인식 실패')
+    else:
+        nutrient_dict = parse_nutrients_from_text(realdata)
+        for key in final_key:
+            final_dict[key] = nutrient_dict.get(key, -1)
+
+    return final_dict
