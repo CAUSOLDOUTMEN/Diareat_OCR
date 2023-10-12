@@ -3,6 +3,6 @@
 *.pyc
 *.jpg
 *.env
-*.conf
+boto.conf.dev
 *.jpeg
 *.png
