@@ -1,4 +1,5 @@
 import re
+import traceback
 
 import cv2
 import boto3
@@ -12,7 +13,7 @@ from utils.nutrition_parser import parse_nutrients_from_text
 from fastapi import FastAPI, HTTPException, Form
 from typing import Optional
 import uuid
-
+import logging
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -113,34 +114,48 @@ s3_client = boto3.client('s3',
 
 BUCKET_NAME = s3_bucket_name
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@app.get("/")
+def health_check():
+    return {"ping":"pong"}
+
 @app.post("/parse_nutrients/")
 async def read_item(image_url: str = Form(...)):
-    file_name = f"temp_{uuid.uuid4().hex}.jpg"
-    s3_client.download_file(BUCKET_NAME, image_url, file_name)
+    try:
+        file_name = f"./temp_{uuid.uuid4().hex}.jpg"
+        s3_client.download_file(BUCKET_NAME, image_url, file_name)
 
-    image = cv2.imread(file_name, cv2.IMREAD_COLOR)
+        image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
-    screen_cnt = preprocessor.detectContour(image)
-    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
+        screen_cnt = preprocessor.detectContour(image)
+        warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
 
-    image_path = "test_image/output/cropped_table_enhanced.jpg"
-    cv2.imwrite(image_path, warped)
-    text = ocr.run_ocr(image_path, debug=True)
+        image_path = "test_image/output/cropped_table_enhanced.jpg"
+        cv2.imwrite(image_path, warped)
+        text = ocr.run_ocr(image_path, debug=True)
 
-    realdata = ""
-    for d in text:
-        if '탄' in d:
-            realdata = d
-            break
+        realdata = ""
+        for d in text:
+            if '탄' in d:
+                realdata = d
+                break
 
-    final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
-    final_dict = {key: -1 for key in final_key}
+        final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
+        final_dict = {key: -1 for key in final_key}
 
-    if not realdata:
-        raise HTTPException(status_code=404, detail='텍스트 인식 실패')
-    else:
-        nutrient_dict = parse_nutrients_from_text(realdata)
-        for key in final_key:
-            final_dict[key] = nutrient_dict.get(key, -1)
+        if not realdata:
+            raise HTTPException(status_code=404, detail='텍스트 인식 실패')
+        else:
+            nutrient_dict = parse_nutrients_from_text(realdata)
+            for key in final_key:
+                final_dict[key] = nutrient_dict.get(key, -1)
 
-    return final_dict
+        return final_dict
+    except Exception:
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+
