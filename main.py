@@ -122,7 +122,7 @@ logger = logging.getLogger(__name__)
 def health_check():
     return {"ping":"pong"}
 
-@app.post("/parse_nutrients/")
+@app.post("/parse_nutrients")
 async def read_item(image_key: str = Form(...)):
     try:
         file_name = f"cache/temp_{image_key}"
