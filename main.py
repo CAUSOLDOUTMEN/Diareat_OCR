@@ -1,16 +1,23 @@
+import os
 import re
+import traceback
 
 import cv2
-import numpy as np
+import boto3
+import configparser
+
+from fastapi.exceptions import RequestValidationError
 
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
 from utils.image_preprocess import PreProcessor
 from utils.image_util import plt_imshow, put_text
 from utils.nutrition_parser import parse_nutrients_from_text
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-
+from fastapi import FastAPI, HTTPException, Form
+from botocore.exceptions import ClientError
+from typing import Optional
+import uuid
+import logging
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -90,37 +97,88 @@ class PororoOcr:
 
 app = FastAPI()
 
-ocr = PororoOcr()  # OCR 모듈 초기화
+ocr = PororoOcr()
 preprocessor = PreProcessor()
 
 
+parser = configparser.ConfigParser()
+parser.read("./boto.conf")
+aws_s3_access_key = parser.get("aws_boto_credentials",
+              "AWS_ACCESS_KEY")
+aws_s3_secret_access_key = parser.get("aws_boto_credentials", "AWS_SECRET_ACCESS_KEY")
+s3_region_name = parser.get("aws_boto_credentials", "REGION_NAME")
+s3_bucket_name = parser.get("aws_boto_credentials",
+              "BUCKET_NAME")
+
+
+s3_client = boto3.client('s3',
+                         aws_access_key_id=aws_s3_access_key,
+                         aws_secret_access_key=aws_s3_secret_access_key,
+                         region_name=s3_region_name)
+
+BUCKET_NAME = s3_bucket_name
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@app.get("/")
+def health_check():
+    return {"ping":"pong"}
+
 @app.post("/parse_nutrients/")
-async def read_item(file: UploadFile = File(...)):
-    contents = await file.read()
-    image_np = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+async def read_item(image_key: str = Form(...)):
+    try:
+        file_name = f"cache/temp_{image_key}"
+        if not os.path.exists(file_name):
+            logger.info("Download image from s3")
+            try:
+                s3_client.download_file(BUCKET_NAME, image_key, file_name)
+            except ClientError:
+                raise HTTPException(status_code=404, detail='Image not found in S3')
+        image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
-    screen_cnt = preprocessor.detectContour(image)
-    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
+        screen_cnt = preprocessor.detectContour(image)
+        warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
 
-    image_path = "test_image/output/cropped_table_enhanced.jpg"
-    cv2.imwrite(image_path, warped)
-    text = ocr.run_ocr(image_path, debug=True)
+        image_path = "test_image/output/cropped_table_enhanced.jpg"
+        cv2.imwrite(image_path, warped)
+        text = ocr.run_ocr(image_path, debug=True)
 
-    realdata = ""
-    for d in text:
-        if '탄' in d:
-            realdata = d
-            break
+        realdata = ""
+        for d in text:
+            if '탄' in d:
+                realdata = d
+                break
 
-    final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
-    final_dict = {key: -1 for key in final_key}
+        final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
+        final_dict = {key: -1 for key in final_key}
 
-    if not realdata:
-        raise HTTPException(status_code=404, detail='텍스트 인식 실패')
-    else:
-        nutrient_dict = parse_nutrients_from_text(realdata)
-        for key in final_key:
-            final_dict[key] = nutrient_dict.get(key, -1)
+        if not realdata:
+            raise HTTPException(status_code=422, detail='Text Recognition Fail')
+        else:
+            nutrient_dict = parse_nutrients_from_text(realdata)
+            for key in final_key:
+                final_dict[key] = nutrient_dict.get(key, -1)
 
-    return final_dict
+        return final_dict
+
+    except (RequestValidationError, ValueError) as e:
+        return {
+            "status_code": "500",
+            "error": "Invalid request data"
+        }
+
+    except HTTPException as e:
+        logger.error(traceback.format_exc())
+        return {
+            "status_code": f"{e.status_code}",
+            "error": f"{e.detail}"
+        }
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+
+
+
