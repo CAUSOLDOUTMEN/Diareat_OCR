@@ -6,6 +6,8 @@ import cv2
 import boto3
 import configparser
 
+from fastapi.exceptions import RequestValidationError
+
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
 from utils.image_preprocess import PreProcessor
@@ -128,7 +130,11 @@ async def read_item(image_key: str = Form(...)):
     try:
         file_name = f"cache/temp_{image_key}"
         if not os.path.exists(file_name):
-            s3_client.download_file(BUCKET_NAME, image_key, file_name)
+            logger.info("Download image from s3")
+            try:
+                s3_client.download_file(BUCKET_NAME, image_key, file_name)
+            except ClientError:
+                raise HTTPException(status_code=404, detail='Image not found in S3')
         image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
         screen_cnt = preprocessor.detectContour(image)
@@ -148,19 +154,30 @@ async def read_item(image_key: str = Form(...)):
         final_dict = {key: -1 for key in final_key}
 
         if not realdata:
-            raise HTTPException(status_code=404, detail='Text Recognition Fail')
+            raise HTTPException(status_code=422, detail='Text Recognition Fail')
         else:
             nutrient_dict = parse_nutrients_from_text(realdata)
             for key in final_key:
                 final_dict[key] = nutrient_dict.get(key, -1)
 
         return final_dict
-    except ClientError:
-        raise HTTPException(status_code=404, detail="Image not found in S3")
+
+    except (RequestValidationError, ValueError) as e:
+        return {
+            "status_code": "500",
+            "error": "Invalid request data"
+        }
+
+    except HTTPException as e:
+        logger.error(traceback.format_exc())
+        return {
+            "status_code": f"{e.status_code}",
+            "error": f"{e.detail}"
+        }
 
     except Exception:
-        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 
 
