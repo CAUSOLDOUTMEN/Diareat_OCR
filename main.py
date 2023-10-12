@@ -1,15 +1,17 @@
 import re
 
 import cv2
-import numpy as np
+import boto3
+import configparser
 
 from pororo import Pororo
 from pororo.pororo import SUPPORTED_TASKS
 from utils.image_preprocess import PreProcessor
 from utils.image_util import plt_imshow, put_text
 from utils.nutrition_parser import parse_nutrients_from_text
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Form
+from typing import Optional
+import uuid
 
 import warnings
 
@@ -90,15 +92,33 @@ class PororoOcr:
 
 app = FastAPI()
 
-ocr = PororoOcr()  # OCR 모듈 초기화
+ocr = PororoOcr()
 preprocessor = PreProcessor()
 
 
+parser = configparser.ConfigParser()
+parser.read("./boto.conf")
+aws_s3_access_key = parser.get("aws_boto_credentials",
+              "AWS_ACCESS_KEY")
+aws_s3_secret_access_key = parser.get("aws_boto_credentials", "AWS_SECRET_ACCESS_KEY")
+s3_region_name = parser.get("aws_boto_credentials", "REGION_NAME")
+s3_bucket_name = parser.get("aws_boto_credentials",
+              "BUCKET_NAME")
+
+
+s3_client = boto3.client('s3',
+                         aws_access_key_id=aws_s3_access_key,
+                         aws_secret_access_key=aws_s3_secret_access_key,
+                         region_name=s3_region_name)
+
+BUCKET_NAME = s3_bucket_name
+
 @app.post("/parse_nutrients/")
-async def read_item(file: UploadFile = File(...)):
-    contents = await file.read()
-    image_np = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+async def read_item(image_url: str = Form(...)):
+    file_name = f"temp_{uuid.uuid4().hex}.jpg"
+    s3_client.download_file(BUCKET_NAME, image_url, file_name)
+
+    image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
     screen_cnt = preprocessor.detectContour(image)
     warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
