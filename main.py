@@ -1,5 +1,4 @@
 import os
-import re
 import traceback
 
 import cv2
@@ -15,8 +14,6 @@ from utils.image_util import plt_imshow, put_text
 from utils.nutrition_parser import parse_nutrients_from_text
 from fastapi import FastAPI, HTTPException, Form
 from botocore.exceptions import ClientError
-from typing import Optional
-import uuid
 import logging
 import warnings
 
