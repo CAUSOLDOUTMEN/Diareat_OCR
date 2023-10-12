@@ -1,0 +1,29 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Docker login
+      uses: docker/login-action@v3.0.0
+      with:
+        username: synoti21
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        logout: true
+        
+    - name: Build and push to DockerHub
+      run: |
+        docker build -t diareat_ocr .
+        docker tag diareat_ocr:latest synoti21/diareat_ocr:latest
+        docker push synoti21/diareat_ocr:latest
