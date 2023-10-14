@@ -13,7 +13,7 @@ def nutrition_run(image):
 
     warped = preprocessor.grayscale_image(image)
 
-    image_path = "test_image/output/cropped_table_enhanced.jpg"
+    image_path = "./test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
     text = ocr.run_ocr(image_path, debug=True)
 
