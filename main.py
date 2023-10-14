@@ -30,7 +30,7 @@ preprocessor = PreProcessor()
 
 
 parser = configparser.ConfigParser()
-parser.read("./boto.conf")
+parser.read("./boto.conf.dev")
 aws_s3_access_key = parser.get("aws_boto_credentials",
               "AWS_ACCESS_KEY")
 aws_s3_secret_access_key = parser.get("aws_boto_credentials", "AWS_SECRET_ACCESS_KEY")
@@ -72,4 +72,8 @@ async def read_item(request: ImageRequest):
             raise HTTPException(status_code=404, detail='Image not found in S3')
     image = cv2.imread(file_name, cv2.IMREAD_COLOR)
 
-    return nutrition_run(image)
+    result = nutrition_run(image)
+    if not result:
+        raise HTTPException(status_code=422, detail='Text Recognition Fail')
+    else:
+        return result

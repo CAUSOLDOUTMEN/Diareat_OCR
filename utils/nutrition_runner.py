@@ -27,7 +27,7 @@ def nutrition_run(image):
     final_dict = {key: -1 for key in final_key}
 
     if not realdata:
-        raise HTTPException(status_code=422, detail='Text Recognition Fail')
+        return False
     else:
         nutrient_dict = parse_nutrients_from_text(realdata)
         for key in final_key:
