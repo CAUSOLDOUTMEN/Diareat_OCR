@@ -11,6 +11,8 @@ class TestOCRAccuracy(unittest.TestCase):
         'test5.jpg': {'내용량': 490, '칼로리': 365, '탄수화물': 67, '지방': 7, '단백질': 8},
         'test6.jpg': {'내용량': 110, '칼로리': 446, '탄수화물': 99, '지방': 3, '단백질': 7},
         'test7.jpg': {'내용량': 120, '칼로리': 505, '탄수화물': 84, '지방': 15, '단백질': 9},
+        'test8.jpeg': {'내용량': 100, '칼로리': 200, '탄수화물': 43, '지방': 1.1, '단백질': 4},
+        'test9.jpeg': {'내용량': 106, '칼로리': 525, '탄수화물': 69, '지방': 25, '단백질': 6},
 
     }
 
@@ -35,6 +37,7 @@ class TestOCRAccuracy(unittest.TestCase):
             self.print_results("기대", expected_value, "96")  # 96: Bright Cyan for expected
 
             if not isinstance(ocr_result, dict):  # OCR 실패 시
+                print(colored_text("영양성분표 인식에 실패했습니다.", "91"))
                 self.print_results("실제", {key: 'F' for key in expected_value.keys()}, "91")
                 print(f"정확도: 0%")
                 print('-' * 40)
