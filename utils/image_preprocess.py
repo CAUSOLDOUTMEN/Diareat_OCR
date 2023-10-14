@@ -1,7 +1,7 @@
 import cv2
 
 class PreProcessor:
-    def grayscale_image(self, original_image):
+    def crop_image(self, original_image):
 
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)  # 그레이 스케일 적용
 
@@ -30,6 +30,9 @@ class PreProcessor:
         # output_path = "../test_image/output/cropped_table_enhanced.jpg"
         # cv2.imwrite(output_path, cropped_image)
 
+    def preprocess_image(self, image):
+        cropped_image = self.crop_image(image)
+        return cropped_image
 
 
 

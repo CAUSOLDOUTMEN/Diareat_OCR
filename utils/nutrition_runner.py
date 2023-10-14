@@ -11,11 +11,12 @@ def nutrition_run(image):
     ocr = PororoOcr()
 
 
-    warped = preprocessor.grayscale_image(image)
+    warped = preprocessor.preprocess_image(image)
 
     image_path = "./test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
     text = ocr.run_ocr(image_path, debug=True)
+    print(text)
 
     realdata = ""
     for d in text:
