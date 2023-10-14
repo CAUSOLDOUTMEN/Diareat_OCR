@@ -8,7 +8,7 @@ def colored_text(text: str, color_code: str) -> str:
 
 class TestOCRAccuracy(unittest.TestCase):
     EXPECTED_VALUES = {
-        'test5.jpg': {'내용량': 490, '칼로리':365, '탄수화물': 67, '지방': 7, '단백질': 8},
+        'test5.jpg': {'내용량': 490, '칼로리': 365, '탄수화물': 67, '지방': 7, '단백질': 8},
         'test6.jpg': {'내용량': 110, '칼로리': 446, '탄수화물': 99, '지방': 3, '단백질': 7},
         'test7.jpg': {'내용량': 120, '칼로리': 505, '탄수화물': 84, '지방': 15, '단백질': 9},
 
@@ -17,7 +17,10 @@ class TestOCRAccuracy(unittest.TestCase):
     def print_results(self, label: str, values: dict, color_code: str):
         print(colored_text(label, color_code), end=" ")
         for key, val in values.items():
-            print(f"{key}: {val}", end=", ")
+            if val == 'F':
+                print(f"{key}: {colored_text(val, '91')}", end=", ")
+            else:
+                print(f"{key}: {val}", end=", ")
         print()
 
     def test_ocr_for_images(self):
@@ -29,11 +32,14 @@ class TestOCRAccuracy(unittest.TestCase):
             image = cv2.imread(file_name, cv2.IMREAD_COLOR)
             ocr_result = nutrition_run(image)
 
-            if not isinstance(ocr_result, dict):
-                print(colored_text(f"Failed to recognize text for {image_name}", "91"))
-                continue
-
             self.print_results("기대", expected_value, "96")  # 96: Bright Cyan for expected
+
+            if not isinstance(ocr_result, dict):  # OCR 실패 시
+                self.print_results("실제", {key: 'F' for key in expected_value.keys()}, "91")
+                print(f"정확도: 0%")
+                print('-' * 40)
+                total_elements += 5
+                continue
 
             actual_values_colored = {}
             num_matched = 0
@@ -59,6 +65,7 @@ class TestOCRAccuracy(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 
