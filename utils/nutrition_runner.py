@@ -24,7 +24,7 @@ def nutrition_run(image):
             realdata = d
             break
 
-    final_key = {'내용량', '칼로리', '탄수화물', '단백질', '지방'}
+    final_key = {'칼로리', '탄수화물', '단백질', '지방'}
     final_dict = {key: -1 for key in final_key}
 
     if not realdata:
