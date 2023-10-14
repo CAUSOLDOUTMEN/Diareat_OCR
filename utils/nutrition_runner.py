@@ -10,8 +10,8 @@ def nutrition_run(image):
     preprocessor = PreProcessor()
     ocr = PororoOcr()
 
-    screen_cnt = preprocessor.detectContour(image)
-    warped = preprocessor.four_point_transform(image, screen_cnt.reshape(4, 2))
+
+    warped = preprocessor.grayscale_image(image)
 
     image_path = "test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
