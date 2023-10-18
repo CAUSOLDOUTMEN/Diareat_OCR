@@ -45,10 +45,7 @@ def check(text):
     if len(text) > 500:
         return Checked(result=False)
 
-    payload = {
-        'color_blindness': '0',
-        'q': text
-    }
+    payload = { 'passportKey': '880af1461495c9169ca22466896beac17fd71d7a', 'q': text, 'color_blindness': '0' }
 
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36',
@@ -111,6 +108,6 @@ def check(text):
             word = word.replace('<blue>', '')
         result['words'][word] = check_result
 
-    result = Checked(**result)
+    result = Checked(**result).only_checked()
 
     return result
