@@ -2,7 +2,7 @@ import cv2
 
 from hanspell import spell_checker
 from utils.image_preprocess import PreProcessor
-from utils.nutrition_parser import parse_nutrients_from_text, correct_ocr_mistakes
+from utils.nutrition_parser import parse_nutrients_from_text
 from utils.pororo_ocr import PororoOcr
 from fastapi import HTTPException
 
@@ -16,8 +16,7 @@ def nutrition_run(image):
 
     image_path = "./test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
-    raw_text = ocr.run_ocr(image_path, debug=True)
-    text = correct_ocr_mistakes(raw_text[0])
+    text = ocr.run_ocr(image_path, debug=True)
     print(text)
 
 
