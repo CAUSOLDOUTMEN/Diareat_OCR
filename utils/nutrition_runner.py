@@ -17,26 +17,13 @@ def nutrition_run(image):
     image_path = "./test_image/output/cropped_table_enhanced.jpg"
     cv2.imwrite(image_path, warped)
     text = ocr.run_ocr(image_path, debug=True)
-    print(text)
-
-
 
     realdata = ""
     for d in text:
-        if '탄' in d:
+        if '탄' or '백' or '방' or '칼' or '열' in d:
             realdata = d
             break
-        elif '백' in d:
-            realdata = d
-            break
-        elif '방' in d:
-            realdata = d
-            break
-        elif '칼' in d:
-            realdata = d
-            break
-    print(realdata)
-
+    print('target string for parsing: ', realdata)
 
     final_key = {'칼로리', '탄수화물', '단백질', '지방'}
     final_dict = {key: -1 for key in final_key}
