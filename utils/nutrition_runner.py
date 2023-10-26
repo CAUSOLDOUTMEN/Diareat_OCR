@@ -20,9 +20,7 @@ def nutrition_run(image):
 
     realdata = ""
     for d in text:
-        if '탄' or '백' or '방' or '칼' or '열' in d:
-            realdata = d
-            break
+        realdata += d
     print('target string for parsing: ', realdata)
 
     final_key = {'칼로리', '탄수화물', '단백질', '지방'}
