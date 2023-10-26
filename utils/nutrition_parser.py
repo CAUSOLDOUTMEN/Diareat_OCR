@@ -5,6 +5,13 @@ def parse_nutrients_from_text(text):
     # nutrient_pattern = r'(\W?(탄수화물|단백질|(?<![가-힣])지방)\W?)\s*([\d.]+)\s*([a-zA-Z]+)'
     kcal_pattern = r'(\d+)\s*kcal'
 
+    # 69와 같이, g와 9를 구분할 수 없는 경우가 있어서, 9 뒤에 공백이 있으면 9를 g로 교체함
+    for i in range(len(text)):
+         if text[i] == '9' and text[i+1] != 'g' and text[i+2] != 'g' and text[i+1] != 'k' and text[i+2] != 'k':
+             text = list(text)
+             text[i] = 'g'
+             text = ''.join(text)
+
     matches = re.findall(nutrient_pattern, text)
     print(matches)
     nutrient_dict = {}
