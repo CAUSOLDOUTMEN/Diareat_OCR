@@ -3,6 +3,5 @@
 *.pyc
 *.jpg
 *.env
-boto.conf.dev
 *.jpeg
 *.png
