@@ -11,6 +11,7 @@ RUN apt -y update && apt -y upgrade
 RUN apt install -y pip && pip install pipenv
 RUN apt install software-properties-common -y
 RUN add-apt-repository ppa:deadsnakes/ppa && apt -y update
+RUN apt-get install -y fonts-noto-cjk
 RUN apt install -y python3.11
 RUN pipenv --python /usr/bin/python3
 RUN pipenv install
