@@ -39,8 +39,8 @@ s3_client = boto3.client(
     aws_access_key_id=aws_access_key,
     aws_secret_access_key=aws_secret_access_key,
     region_name=region_name,
-    bucket_name=bucket_name
 )
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
