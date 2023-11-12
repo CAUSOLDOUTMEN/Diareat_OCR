@@ -1,7 +1,22 @@
 import re
+from fuzzywuzzy import process
+
+def correct_ocr_text(text):
+    target_words = ["칼로리", "탄수화물", "단백질", "지방"]
+    corrected_text = text
+    for word in target_words:
+        extracted_words = process.extractBests(word, text.split(), score_cutoff=75, limit=10)
+        for extracted_word, score in extracted_words:
+            if abs(len(extracted_word) - len(word)) <= 1:
+                corrected_text = corrected_text.replace(extracted_word, word)
+                break
+
+    print(f'after correcting: ${corrected_text}')
+    return corrected_text
+
 
 def parse_nutrients_from_text(text):
-    nutrient_pattern = r'(물|질|방|류)\s*(\d+(?:\.\d+)?)(?:\s*g)?'
+    nutrient_pattern = r'(물|질|방|류)\s*(\d+(?:\.\d+)?)(?:\s*g)?' # 영양성분표는 정해진 규격이 있어, 네 영양소를 구분 짓는 글자로 파싱
     # nutrient_pattern = r'(\W?(탄수화물|단백질|(?<![가-힣])지방)\W?)\s*([\d.]+)\s*([a-zA-Z]+)'
     kcal_pattern = r'(\d+)\s*kcal'
 
