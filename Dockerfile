@@ -20,6 +20,7 @@ COPY . /app/
 
 RUN pipenv run pip install cmake
 RUN pipenv run pip install easyocr
+RUN pipenv run pip install fuzzywuzzy
 
 EXPOSE 8000
 
