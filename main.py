@@ -28,23 +28,19 @@ app = FastAPI()
 ocr = PororoOcr()
 preprocessor = PreProcessor()
 
-
-parser = configparser.ConfigParser()
-parser.read("./boto.conf.dev")
-aws_s3_access_key = parser.get("aws_boto_credentials",
-              "AWS_ACCESS_KEY")
-aws_s3_secret_access_key = parser.get("aws_boto_credentials", "AWS_SECRET_ACCESS_KEY")
-s3_region_name = parser.get("aws_boto_credentials", "REGION_NAME")
-s3_bucket_name = parser.get("aws_boto_credentials",
-              "BUCKET_NAME")
+aws_access_key = os.environ.get('AWS_ACCESS_KEY')
+aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+bucket_name = os.environ.get('BUCKET_NAME')
+region_name = os.environ.get('REGION_NAME')
 
 
-s3_client = boto3.client('s3',
-                         aws_access_key_id=aws_s3_access_key,
-                         aws_secret_access_key=aws_s3_secret_access_key,
-                         region_name=s3_region_name)
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=aws_access_key,
+    aws_secret_access_key=aws_secret_access_key,
+    region_name=region_name,
+)
 
-BUCKET_NAME = s3_bucket_name
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,7 +63,7 @@ async def read_item(request: ImageRequest):
     if not os.path.exists(file_name):
         logger.info("Download image from s3")
         try:
-            s3_client.download_file(BUCKET_NAME, image_name, file_name)
+            s3_client.download_file(bucket_name, image_name, file_name)
         except ClientError:
             raise HTTPException(status_code=404, detail='Image not found in S3')
     image = cv2.imread(file_name, cv2.IMREAD_COLOR)
