@@ -23,7 +23,7 @@ def nutrition_run(image):
         realdata += d
     print('before correcting: ', realdata)
 
-    final_key = {'칼로리', '탄수화물', '단백질', '지방'}
+    final_key = {'kcal', 'carbohydrate', 'protein', 'fat'}
     final_dict = {key: -1 for key in final_key}
 
     if not realdata:

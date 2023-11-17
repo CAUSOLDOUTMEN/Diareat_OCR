@@ -58,6 +58,8 @@ def handle_unexpected_error(request, exc: Exception):
 
 @app.post("/parse_nutrients", status_code=201)
 async def read_item(request: ImageRequest):
+    logger.info(request)
+    logger.info(request.image_key)
     image_name = request.image_key
     file_name = f"./cache/temp_{image_name}"
     if not os.path.exists(file_name):
