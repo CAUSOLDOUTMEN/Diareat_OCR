@@ -35,10 +35,8 @@ def parse_nutrients_from_text(text):
     for match in matches:
         if match[0] == '물': # 물로 끝나면 탄수화물이라고 판단
             nutrient_dict['carbohydrate'] = float(match[1])
-        elif match[0] == '류': # 류로 끝나면 당류라고 판단
-            nutrient_dict['당류'] = float(match[1])
         elif match[0] == '질': # 질로 끝나면 단백질이라고 판단
-            if match[1].startswith('0') and len(match[1]) > 1: # 0으로 시작하는데 소수점을 잃은 경우(02g 등)에 대한 예외처리
+            if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.': # 0으로 시작하는데 소수점을 잃은 경우(02g 등)에 대한 예외처리
                 nutrient_dict['protein'] = float(match[1]) / 10
                 continue
             nutrient_dict['protein'] = float(match[1])
