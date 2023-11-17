@@ -32,10 +32,10 @@ class PreProcessor:
         # cv2.imwrite(output_path, cropped_image)
 
     def preprocess_image(self, image):
-        cropped_image = self.crop_image(image)
+        #cropped_image = self.crop_image(image)
         # 1. 이진화 (Binarization)
         # 그레이스케일로 변환
-        gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
+        #gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
 
         #
         # kernel_sharpening = np.array([[-1,-1,-1],
@@ -50,7 +50,7 @@ class PreProcessor:
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        return cropped_image
+        return image
 
 if __name__ == "__main__":
     image = cv2.imread('../test_image/input/test3.jpg',cv2.IMREAD_COLOR)
