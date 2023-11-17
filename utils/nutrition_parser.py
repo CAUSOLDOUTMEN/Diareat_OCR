@@ -5,7 +5,7 @@ def correct_ocr_text(text):
     target_words = ["kcal", "탄수화물", "단백질", "지방"]
     corrected_text = text
     for word in target_words:
-        extracted_words = process.extractBests(word, text.split(), score_cutoff=75, limit=10)
+        extracted_words = process.extractBests(word, text.split(), score_cutoff=60, limit=10)
         for extracted_word, score in extracted_words:
             if abs(len(extracted_word) - len(word)) <= 1:
                 corrected_text = corrected_text.replace(extracted_word, word)
