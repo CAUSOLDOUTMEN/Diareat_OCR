@@ -21,9 +21,10 @@ COPY . /app/
 RUN pipenv run pip install cmake
 RUN pipenv run pip install easyocr
 RUN pipenv run pip install fuzzywuzzy
+RUN pipenv run pip install python-Levenshtein
 
 EXPOSE 8000
 
 
-CMD ["pipenv", "run","uvicorn", "main:app", "--host","0.0.0.0","--port","8000"]
+CMD ["pipenv", "run","python", "main.py"]
 

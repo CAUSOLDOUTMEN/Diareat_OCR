@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import uvicorn
 from starlette.responses import JSONResponse
 from utils.image_preprocess import PreProcessor
 from fastapi import FastAPI, HTTPException, File, UploadFile
@@ -9,14 +10,9 @@ import warnings
 
 from utils.nutrition_runner import nutrition_run
 from utils.pororo_ocr import PororoOcr
-from concurrent.futures import ProcessPoolExecutor
-import asyncio
 
 
 warnings.filterwarnings('ignore')
-executor = ProcessPoolExecutor(max_workers=10)
-
-
 
 class ImageRequest(BaseModel):
     image_key: str
@@ -29,11 +25,6 @@ preprocessor = PreProcessor()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-async def run_in_executor(func, *args):
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(executor, func, *args)
-    return result
 
 @app.get("/")
 def health_check():
@@ -53,9 +44,18 @@ async def read_item(file: UploadFile = File(...)):
 
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    result = await run_in_executor(nutrition_run, image)
+    result = nutrition_run(image)
 
     if not result:
         raise HTTPException(status_code=422, detail='Text Recognition Fail')
     else:
         return result
+
+if __name__ == '__main__':
+    uvicorn.run(
+        app='main:app',
+        host='127.0.0.1',
+        port=8000,
+        workers=3,
+        access_log=False,
+    )
