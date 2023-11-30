@@ -5,7 +5,7 @@ def correct_ocr_text(text):
     target_words = ["kcal", "탄수화물", "단백질", "지방"]
     corrected_text = text
     for word in target_words:
-        extracted_words = process.extractBests(word, text.split(), score_cutoff=60, limit=10)
+        extracted_words = process.extractBests(word, text.split(), score_cutoff=50, limit=50)
         for extracted_word, score in extracted_words:
             if abs(len(extracted_word) - len(word)) <= 1:
                 corrected_text = corrected_text.replace(extracted_word, word)
@@ -22,7 +22,8 @@ def fix_nine_to_g(text):
     return text
 
 def parse_nutrients_from_text(text):
-    text = text.replace(',', '')
+    text = text.replace(',', '') # 파싱을 방해하는 , 문자 제거
+    text = text.replace("'", '') # ' 제거
     text = fix_nine_to_g(text)
 
     nutrient_pattern = r'(율|물|집|질|방)\s*(\d+(?:\.\d+)?)\s*g?'
