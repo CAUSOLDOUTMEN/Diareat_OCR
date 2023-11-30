@@ -22,9 +22,10 @@ def fix_nine_to_g(text):
     return text
 
 def parse_nutrients_from_text(text):
+    text = text.replace(',', '')
     text = fix_nine_to_g(text)
 
-    nutrient_pattern = r'(물|질|방)\s*(\d+(?:\.\d+)?)\s*g?'
+    nutrient_pattern = r'(율|물|집|질|방)\s*(\d+(?:\.\d+)?)\s*g?'
     kcal_pattern = r'(\d+)\s*k'
 
     matches = re.findall(nutrient_pattern, text)
@@ -33,9 +34,12 @@ def parse_nutrients_from_text(text):
     fats = [] # 지방, 포화지방, 트랜스지방을 담아 가장 큰 값을 지방으로 판단
 
     for match in matches:
-        if match[0] == '물': # 물로 끝나면 탄수화물이라고 판단
+        if match[0] == '물' or match[0] == '율': # 물로 끝나면 탄수화물이라고 판단
+            if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.':
+                nutrient_dict['carbohydrate'] = float(match[1]) / 10
+                continue
             nutrient_dict['carbohydrate'] = float(match[1])
-        elif match[0] == '질': # 질로 끝나면 단백질이라고 판단
+        elif match[0] == '질' or match[0] == '집': # 질로 끝나면 단백질이라고 판단
             if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.': # 0으로 시작하는데 소수점을 잃은 경우(02g 등)에 대한 예외처리
                 nutrient_dict['protein'] = float(match[1]) / 10
                 continue
