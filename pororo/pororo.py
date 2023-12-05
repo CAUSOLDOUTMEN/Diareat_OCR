@@ -66,6 +66,8 @@ class Pororo:
         lang = lang.lower()
         lang = LANG_ALIASES[lang] if lang in LANG_ALIASES else lang
 
+        # Empty cache before running
+        torch.cuda.empty_cache()
         # Get device information from torch API
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
