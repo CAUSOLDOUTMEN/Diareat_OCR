@@ -11,7 +11,6 @@ import warnings
 from utils.nutrition_runner import nutrition_run
 from utils.pororo_ocr import PororoOcr
 
-
 warnings.filterwarnings('ignore')
 
 class ImageRequest(BaseModel):
@@ -54,8 +53,8 @@ async def read_item(file: UploadFile = File(...)):
 if __name__ == '__main__':
     uvicorn.run(
         app='main:app',
-        host='127.0.0.1',
+        host='0.0.0.0',
         port=8000,
-        workers=3,
+        workers=4,
         access_log=False,
     )

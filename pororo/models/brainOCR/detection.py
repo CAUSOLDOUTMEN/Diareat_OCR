@@ -28,6 +28,9 @@ def copy_state_dict(state_dict):
 
 
 def test_net(image: np.ndarray, net, opt2val: dict):
+    #Empty cuda cache
+    torch.cuda.empty_cache()
+
     canvas_size = opt2val["canvas_size"]
     mag_ratio = opt2val["mag_ratio"]
     text_threshold = opt2val["text_threshold"]
