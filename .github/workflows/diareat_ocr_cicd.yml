@@ -39,12 +39,12 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
-            echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" > env.list
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> env.list
-            echo "REGION_NAME=${{ secrets.REGION_NAME }}" >> env.list
-            echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> env.list
-            
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            sudo docker rm $(sudo docker stop $(sudo docker ps -a -q --filter ancestor=synoti21/diareat_ocr:latest --format="{{.ID}}"))
+            sudo docker rmi synoti21/diareat_ocr:latest
             sudo docker pull synoti21/diareat_ocr:latest
-            sudo docker-compose --env-file=env.list up -d ocr
-            sudo docker image prune -f
+            
+            sudo docker run -d -p 8000:8000 --name diareat_ocr --runtime=nvidia --gpus=all synoti21/diareat_ocr:latest
+            sleep 10s
+            sudo docker ps | grep synoti21/diareat_ocr:latest
 
