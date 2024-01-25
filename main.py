@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import uvicorn
 from starlette.responses import JSONResponse
+
+from utils.clova import clova_ocr
 from utils.image_preprocess import PreProcessor
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import BaseModel
@@ -39,11 +41,8 @@ def handle_unexpected_error(request, exc: Exception):
 @app.post("/parse_nutrients", status_code=201)
 async def read_item(file: UploadFile = File(...)):
     contents = await file.read()
-    nparr = np.frombuffer(contents, np.uint8)
 
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    result = nutrition_run(image)
+    result = clova_ocr(file, contents)
 
     if not result:
         raise HTTPException(status_code=422, detail='Text Recognition Fail')
