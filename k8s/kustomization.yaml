@@ -5,3 +5,6 @@ resources:
 images:
 - name: synoti21/diareat-ocr
   newName: synoti21/diareat-ocr
+- name: synoti21/diareat_ocr
+  newName: synoti21/diareat_ocr
+  newTag: a758cac7
