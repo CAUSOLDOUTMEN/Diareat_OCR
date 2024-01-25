@@ -3,6 +3,8 @@ name: Diareat OCR CI/CD
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+    - 'k8s/**'
 
 jobs:
 
