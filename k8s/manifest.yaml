@@ -4,6 +4,7 @@ metadata:
   name: diareat-ocr
   namespace: diareat
 spec:
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: diareat-ocr
@@ -12,7 +13,6 @@ spec:
       labels:
         app: diareat-ocr
     spec:
-      revisionHistoryLimit: 3
       containers:
       - name: diareat-ocr
         image: synoti21/diareat-ocr:latest
