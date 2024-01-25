@@ -21,42 +21,38 @@ def fix_nine_to_g(text):
                 text = text[:i] + 'g' + text[i + 1:] # 9를 g로 바꿔줌
     return text
 
-def parse_nutrients_from_text(text):
-    text = text.replace(',', '') # 파싱을 방해하는 , 문자 제거
-    text = text.replace("'", '') # ' 제거
-    text = fix_nine_to_g(text)
-
-    nutrient_pattern = r'(율|물|집|질|방)\s*(\d+(?:\.\d+)?)\s*g?'
+def parse_nutrients_from_text(text):  # 기존 코드에 존재하던 부분
+    nutrient_pattern = r'(물|질|방)\s*(\d+(?:\.\d+)?)\s?g'
     kcal_pattern = r'(\d+)\s*k'
 
     matches = re.findall(nutrient_pattern, text)
-    print(matches)
-    nutrient_dict = {}
-    fats = [] # 지방, 포화지방, 트랜스지방을 담아 가장 큰 값을 지방으로 판단
+    nutrient_dict = {'탄수화물': 0, '단백질': 0, '지방': 0, '칼로리': 0}
+    fats = []  # 지방, 포화지방, 트랜스지방을 담아 가장 큰 값을 지방으로 판단
 
     for match in matches:
-        if match[0] == '물' or match[0] == '율': # 물로 끝나면 탄수화물이라고 판단
+        # print(match[0])
+        if match[0] == '물':  # 물로 끝나면 탄수화물이라고 판단
             if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.':
-                nutrient_dict['carbohydrate'] = float(match[1]) / 10
+                nutrient_dict['탄수화물'] = float(match[1]) / 10
                 continue
-            nutrient_dict['carbohydrate'] = float(match[1])
-        elif match[0] == '질' or match[0] == '집': # 질로 끝나면 단백질이라고 판단
-            if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.': # 0으로 시작하는데 소수점을 잃은 경우(02g 등)에 대한 예외처리
-                nutrient_dict['protein'] = float(match[1]) / 10
+            nutrient_dict['탄수화물'] = float(match[1])
+        elif match[0] == '질':  # 질로 끝나면 단백질이라고 판단
+            if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.':
+                nutrient_dict['단백질'] = float(match[1]) / 10
                 continue
-            nutrient_dict['protein'] = float(match[1])
-        elif match[0] == '방': # 방으로 끝나면 지방, 포화지방, 트랜스지방 이라고 판단 (합계)
+            nutrient_dict['단백질'] = float(match[1])
+        elif match[0] == '방':  # 방으로 끝나면 지방, 포화지방, 트랜스지방 이라고 판단 (합계)
             if match[1].startswith('0') and len(match[1]) > 1 and match[1][1] != '.':
                 fats.append(float(match[1]) / 10)
                 continue
             fats.append(float(match[1]))
 
     if len(fats) != 0:
-        nutrient_dict['fat'] = max(fats) # "방"으로 끝나는 것들의 숫자를 파싱한 값 중 가장 큰 값을 지방으로 판단 (포함의 관계이므로)
-    kcal_matches = re.findall(kcal_pattern, text) # 칼로리는 kcal로 끝나는 숫자
+        nutrient_dict['지방'] = max(fats)  # "방"으로 끝나는 것들의 숫자를 파싱한 값 중 가장 큰 값을 지방으로 판단 (포함의 관계이므로)
+    kcal_matches = re.findall(kcal_pattern, text)  # 칼로리는 kcal로 끝나는 숫자
     if not kcal_matches:
-        nutrient_dict['kcal'] = -1
+        nutrient_dict['칼로리'] = -1
     else:
-        nutrient_dict['kcal'] = float(kcal_matches[0])
+        nutrient_dict['칼로리'] = float(kcal_matches[0])
 
     return nutrient_dict
