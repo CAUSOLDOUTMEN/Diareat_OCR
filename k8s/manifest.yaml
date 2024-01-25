@@ -24,9 +24,9 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "0.8"
-          envFrom:
-            secretRef:
-              name: diareat-ocr-secret
+        envFrom:
+          secretRef:
+            name: diareat-ocr-secret
         ports:
         - containerPort: 8000
         readinessProbe:
