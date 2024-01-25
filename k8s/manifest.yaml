@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diareat-ocr
+  namespace: diareat
+spec:
+  selector:
+    matchLabels:
+      app: diareat-ocr
+  template:
+    metadata:
+      labels:
+        app: diareat-ocr
+    spec:
+      revisionHistoryLimit: 3
+      containers:
+      - name: diareat-ocr
+        image: synoti21/diareat-ocr:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "0.2"
+          limits:
+            memory: "1Gi"
+            cpu: "0.8"
+          envFrom:
+            secretRef:
+              name: diareat-ocr-secret
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: diareat-ocr
+  namespace: diareat
+spec:
+  selector:
+    app: diareat-ocr
+  ports:
+  - port: 8800
+    targetPort: 8000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: diareatocr-route
+  namespace: diareat
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`diareat-ocr.thisiswandol.com`)
+      kind: Rule
+      services:
+        - name: diareat-svc
+          port: 8800
+  tls:
+    certResolver: myresolver
