@@ -40,7 +40,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: diareat-svc
+  name: diareat-ocr-svc
   namespace: diareat
 spec:
   selector:
@@ -61,7 +61,7 @@ spec:
     - match: Host(`diareat-ocr.thisiswandol.com`)
       kind: Rule
       services:
-        - name: diareat-svc
+        - name: diareat-ocr-svc
           port: 8800
   tls:
     certResolver: myresolver
