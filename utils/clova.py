@@ -1,8 +1,8 @@
+import os
 import requests
 import uuid
 import time
 import json
-import configparser
 
 
 from utils.nutrition_parser import parse_nutrients_from_text
@@ -10,11 +10,8 @@ from utils.nutrition_parser import parse_nutrients_from_text
 
 
 def clova_ocr(file, file_content):
-    parser = configparser.ConfigParser()
-    parser.read("./clova.conf")
-
-    api_url = parser.get("clova_credentials", "API_URL")
-    secret_key = parser.get("clova_credentials", "SECRET_KEY")
+    api_url = os.environ.get("API_URL")
+    secret_key = os.environ.get("SECRET_KEY")
 
     request_json = {
         'images': [
