@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: diareat_ocr
+  name: diareat-ocr
   namespace: diareat
 spec:
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: diareat_ocr
+      app: diareat-ocr
   template:
     metadata:
       labels:
-        app: diareat_ocr
+        app: diareat-ocr
     spec:
       containers:
       - name: diareat-ocr
-        image: synoti21/diareat_ocr:latest
+        image: synoti21/diareat-ocr:latest
         imagePullPolicy: Always
         resources:
           requests:
@@ -40,7 +40,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: diareat-ocr
+  name: diareat-svc
   namespace: diareat
 spec:
   selector:
