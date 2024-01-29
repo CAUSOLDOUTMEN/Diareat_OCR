@@ -5,4 +5,4 @@ resources:
 images:
 - name: synoti21/diareat-ocr
   newName: synoti21/diareat-ocr
-  newTag: c550280f
+  newTag: be3c6939
