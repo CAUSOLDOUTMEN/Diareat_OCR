@@ -5,6 +5,3 @@ resources:
 images:
 - name: synoti21/diareat-ocr
   newName: synoti21/diareat-ocr
-- name: synoti21/diareat_ocr
-  newName: synoti21/diareat_ocr
-  newTag: 31d2b116
