@@ -30,8 +30,8 @@ jobs:
         
     - name: Build and push to DockerHub
       run: |
-        docker build -t synoti21/diareat_ocr:${{ steps.image.outputs.version }} .
-        docker push synoti21/diareat_ocr:${{ steps.image.outputs.version }}
+        docker build -t synoti21/diareat-ocr:${{ steps.image.outputs.version }} .
+        docker push synoti21/diareat-ocr:${{ steps.image.outputs.version }}
 
   CD:
     runs-on: ubuntu-latest
